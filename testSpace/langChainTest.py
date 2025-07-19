@@ -51,34 +51,6 @@ def listen():
             print(f"Error listening or recognising {e}")
             return None
 
-# --- AGENT TOOLS (No changes here) ---
-
-@tool
-def get_current_time() -> str:
-    """Retruns the current time in  a human-readable format."""
-    return datetime.now().strftime("%I:%M %p")
-
-@tool
-def open_application(app_name: str) -> str:
-    """
-    Opens an application on the user's computer.
-    'app_name' should be the name of the application, e.g., 'Google Chrome', 'Notepad', 'Terminal'.
-    """
-
-    # This removes leading/trailing whitespace and any surrounding quotes
-    clean_app_name = app_name.strip().strip("'\"")
-    print(f"Attempting to open {clean_app_name}")
-    try:
-        if 'darwin' in os.sys.platform:
-            subprocess.run(["open", "-a", clean_app_name],check=True)
-        elif 'win32' in os.sys.platform:
-            os.startfile(clean_app_name)
-        else:
-            subprocess.run(["xdg-open", app_name], check=True)
-        return f"The application {clean_app_name} has been successfully opened."
-    except Exception as e:
-        return f"Error opening {clean_app_name}: {e}. The app might not be installed or the name is incorrect."
-
     # MAIN AGENT LOGIC
 if __name__ == "__main__":
     try :

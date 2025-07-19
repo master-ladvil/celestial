@@ -1,5 +1,20 @@
 {
-  "model" : "llama3:8b",
-  "temperature" : 0.3,
-  "promptFileLocation" : ""
+  "llmDetails" :
+  {
+    "model" : "llama3:8b",
+    "temperature" : 0.3,
+    "promptFileLocation" : "config/main/prompt.txt"
+  },
+  "audioOutDetails" :
+  {
+    "driver_name": "sapi5",
+    "rate" : 180
+  },
+  "transcribeProperties" :
+  {
+    "chunk_size" : 2048,
+    "pause_threshold" : 1.5,
+    "timeout" : 5,
+    "phrase_time_limit" : 10
+  }
 }
