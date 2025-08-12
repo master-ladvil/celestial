@@ -1,23 +1,22 @@
 import json
-import subprocess
-import time
 
-from celestial.source.io.celestialVoice import CelestialVoice
-from celestial.source.io.transcribe import CelestialEar
-from langchain_community.chat_models import ChatOllama
-from celestial.source.tools.invocation.tools import get_current_time, open_application, search_internet
+from source.io.celestialVoice import CelestialVoice
+from source.io.transcribe import CelestialEar
+from source.tools.invocation.tools import get_current_time, open_application, search_internet
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 
-def checkOllama(config_data):
-    llmDetails = config_data["llmDetails"]
-    llm = ChatOllama(model=llmDetails["model"], temperature=llmDetails["temperature"])
-    llm.invoke("hello")
-    return llm
+import os
+
+from source.LlmConnectors.LlmConnectorMap import get_llm
+
+script_dir = os.path.dirname(__file__)
+# Join that directory with the relative path to your config file
+config_path = os.path.join(script_dir, "config/main/mainConfig.json")
 
 def load_config_data():
     try:
-        with open("config/main/mainConfig.json",'r') as file:
+        with open(config_path,'r') as file:
             config_data = json.load(file)
             return config_data
     except Exception as e:
@@ -38,23 +37,7 @@ if __name__ == "__main__":
 
 #     Agent Logic
 
-    try:
-        llm = checkOllama(config_data)
-    except Exception as e:
-        voice.speak("Error connection to Ollama. Please make sure ollama server is running and the model is pulled,.  do you want to try starting it?")
-        ollamastart = ear.listen()
-        if("yes" in ollamastart):
-            try:
-                voice.speak("trying to start Ollama...")
-                subprocess.run("ollama serve")
-                time.sleep(5)
-                checkOllama(config_data)
-            except Exception as e:
-                voice.speak(f"Could not start ollama hope the model is not installed Exception : {e}")
-                exit()
-        else :
-            print(f"Exception : {e}")
-            exit()
+    llm = get_llm(llmDetails)
 
     tools=[get_current_time,open_application,search_internet]
 

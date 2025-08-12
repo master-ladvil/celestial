@@ -1,7 +1,10 @@
 {
   "llmDetails" :
   {
-    "model" : "llama3:8b",
+    "connector_name" : "online_openai",
+    "api_key" : "",
+    "online_model_name" : "gpt-4o-mini",
+    "local_model_name" : "llama3:8b",
     "temperature" : 0.3,
     "promptFileLocation" : "config/main/prompt.txt"
   },
