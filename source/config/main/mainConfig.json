@@ -1,7 +1,7 @@
 {
   "llmDetails" :
   {
-    "connector_name" : "online_openai",
+    "connector_name" : "local_ollama",
     "api_key" : "",
     "online_model_name" : "gpt-4o-mini",
     "local_model_name" : "llama3:8b",

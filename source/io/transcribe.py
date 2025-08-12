@@ -1,3 +1,5 @@
+import asyncio
+
 import speech_recognition as sr
 
 class CelestialEar:
@@ -9,7 +11,11 @@ class CelestialEar:
         self.timeout = timeout
         self.phrase_time_limit = phrase_time_limit
 
-    def listen(self):
+    async def listen(self):
+        running_loop = asyncio.get_running_loop()
+        command = await running_loop.run_in_executor(None,self.core_listen)
+        return command
+    def core_listen(self):
         with sr.Microphone(chunk_size=self.chunk_size) as source:
             print("listening....")
             self.recognizer.pause_threshold = self.pause_threshold
@@ -21,8 +27,6 @@ class CelestialEar:
                 print(f"you said : {command}")
                 return command
             except sr.WaitTimeoutError:
-                # This error is less likely without a timeout, but good practice to keep.
-                print("Listening timed out while waiting for phrase to start.")
                 return None
             except Exception as e:
                 print(f"Error listening or recognising {e}")
