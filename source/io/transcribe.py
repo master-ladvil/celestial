@@ -109,7 +109,7 @@ class CelestialEar:
         loop = asyncio.get_running_loop()
         try:
             # Use run_in_executor to wait for the blocking get() because it waits for 1 sec if nothing in queue call without freezing the event loop
-            command = await loop.run_in_executor(None, self.result_queue.get())
+            command = await loop.run_in_executor(None, self.result_queue.get)
             return command
         except asyncio.CancelledError:
             print("Listening task cancelled....")
