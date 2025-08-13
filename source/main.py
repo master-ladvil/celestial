@@ -40,13 +40,18 @@ async def main():
         return
 
     # --- Initialise IO ---
-    ear_properties = config_data["transcribeProperties"]
-    ear = CelestialEar(ear_properties["chunk_size"],ear_properties["pause_threshold"],ear_properties["timeout"],ear_properties["phrase_time_limit"])
+    try:
 
-    voice_properties = config_data["audioOutDetails"]
-    voice = CelestialVoice(voice_properties["rate"],voice_properties["driver_name"])
+        ear_properties = config_data["transcribeProperties"]
+        ear = CelestialEar(ear_properties)
 
-    llmDetails = config_data["llmDetails"]
+        voice_properties = config_data["audioOutDetails"]
+        voice = CelestialVoice(voice_properties["rate"],voice_properties["driver_name"])
+
+        llmDetails = config_data["llmDetails"]
+    except KeyError as e:
+        print(f"Configuration error keys missing: Missing key {e}")
+        return
 
     # --- Agent Logic ---
     try:
@@ -90,6 +95,7 @@ async def main():
 
             if any(word in user_inptut.lower() for word in ["terminate", "exit"]):
                 await voice.speak("Quitting....")
+                ear.stop()
                 break
 
             speaking_task = asyncio.create_task(respond_and_speak(user_inptut,voice,agent_executor))

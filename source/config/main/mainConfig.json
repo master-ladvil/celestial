@@ -1,8 +1,7 @@
 {
   "llmDetails" :
   {
-    "connector_name" : "local_ollama",
-    "api_key" : "",
+    "connector_name" : "online_openai",
     "online_model_name" : "gpt-4o-mini",
     "local_model_name" : "llama3:8b",
     "temperature" : 0.3,
@@ -15,9 +14,11 @@
   },
   "transcribeProperties" :
   {
-    "chunk_size" : 2048,
-    "pause_threshold" : 1.5,
-    "timeout" : 5,
-    "phrase_time_limit" : 10
+    "model_name": "base.en",
+    "energy_threshold": 1000,
+    "pause_threshold": 0.8,
+    "phrase_time_limit": 10,
+    "timeout": 1.0,
+    "sample_rate": 16000
   }
 }
