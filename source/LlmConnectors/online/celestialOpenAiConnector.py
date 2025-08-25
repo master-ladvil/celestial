@@ -1,6 +1,7 @@
 from langchain_openai import ChatOpenAI
 
 from source.LlmConnectors.llmConnectorsInterface import LlmConnectorsInterface
+from dotenv import load_dotenv
 
 class CelestialOpenAiConnector(LlmConnectorsInterface):
 
@@ -8,6 +9,7 @@ class CelestialOpenAiConnector(LlmConnectorsInterface):
         self.config = config
 
     def connect(self):
-        llm = ChatOpenAI(model=self.config["online_model_name"],temperature=self.config["temperature"],api_key=self.config["api_key"])
+        load_dotenv()
+        llm = ChatOpenAI(model=self.config["online_model_name"],temperature=self.config["temperature"])
         llm.invoke("hello")
         return llm
