@@ -8,6 +8,8 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from source.LlmConnectors.LlmConnectorMap import get_llm
 
+from source.core.agent import CelestialAgent
+
 script_dir = os.path.dirname(__file__)
 config_path = os.path.join(script_dir, "config/main/mainConfig.json")
 
@@ -19,6 +21,18 @@ def load_config_data():
         print(f"Error while getting config file: {e}")
         return None
 
+
+async def process_and_speak(user_input,voice,agent):
+    """Gets agent response and speak"""
+    try:
+        response  = await agent.get_response(user_input=user_input)
+        await voice.speak(response)
+    except asyncio.CancelledError:
+        print("Response task was cancelled successfully")
+    except Exception as e:
+        print(f"Error During agent Response {e}")
+
+@DeprecationWarning
 async def initialize_agent():
     """
     Initializes and returns the agent_executor.
@@ -40,56 +54,62 @@ async def initialize_agent():
     agent = create_react_agent(llm, tools, prompt)
     return AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-
-async def respond_and_speak(inp, current_voice, current_agent_executor):
-    """Core logic for responding to a single input."""
-    try:
-        response = await current_agent_executor.ainvoke({"input": inp})
-        await current_voice.speak(response['output'])
-    except asyncio.CancelledError:
-        print("Response task was cancelled successfully.")
-    except Exception as e:
-        print(f"Error during agent response: {e}")
-
-
-async def main_interactive_loop():
-    """The main interactive loop for the user."""
+async def main_interactive_loop(voice,ear,config_data):
+    """
+    Initializes the agent and runs the main interactive loop.
+    """
     print("Initializing agent for interactive session...")
-    agent_executor = await initialize_agent()
+
+    llm = get_llm(config_data["llmDetails"])
+    tools=[get_current_time,open_application,search_internet]
+
+    celestial_agent = CelestialAgent(llm=llm,tools=tools)
+    await voice.speak("Celestial Activated... How can i Help?")
+
+    speaking_task=None
+    while True:
+        user_input = await ear.listen()
+        if user_input:
+            if speaking_task and not speaking_task.done():
+                print("Interrupting previous Response.")
+                speaking_task.cancel()
+                await voice.stop()
+
+            if any(word in user_input.lower() for word in ["terminate","exit","quit"]):
+                await voice.speak("Quiting...")
+                break
+
+            speaking_task = asyncio.create_task(
+                process_and_speak(user_input=user_input,voice=voice,agent=celestial_agent)
+            )
+
+async def main():
     config_data = load_config_data()
+    if not config_data:
+        print("Problem loading in config data..")
+        return
 
-    print("Initializing I/O...")
-    ear_properties = config_data["transcribeProperties"]
-    ear = CelestialEar(ear_properties)
-
-    voice_properties = config_data["audioOutDetails"]
-    voice = CelestialVoice(voice_properties["rate"], voice_properties["driver_name"])
-
-    await voice.speak("Celestial activated..., How can I help?")
-    speaking_task = None
-
+    ear = None
     try:
-        while True:
-            user_input = await ear.listen()
-            if user_input:
-                if speaking_task and not speaking_task.done():
-                    print("Interrupting previous response.")
-                    speaking_task.cancel()
-                    await voice.stop()
+        ear_properties = config_data["transcribe_properties"]
+        ear=CelestialEar(transcribe_properties=ear_properties)
 
-                if any(word in user_input.lower() for word in ["terminate", "exit"]):
-                    await voice.speak("Quitting....")
-                    break
+        voice_properties = config_data["audioOutDetails"]
+        voice = CelestialVoice(rate=voice_properties["rate"],driver_name=voice_properties["driver_name"])
 
-                speaking_task = asyncio.create_task(respond_and_speak(user_input, voice, agent_executor))
+        await main_interactive_loop(main_interactive_loop(voice,ear))
+
+    except KeyError as e:
+        print(f"Configuration error: Missing key {e}.")
+    except KeyboardInterrupt:
+        print("\n Program interupted by user")
     finally:
-        print("Shutting down listening threads...")
-        ear.stop()
+        if ear:
+            print("Shutting down listening threads")
+            ear.stop()
 
 
 if __name__ == "__main__":
     # This allows the script to be run as the main interactive assistant
-    try:
-        asyncio.run(main_interactive_loop())
-    except KeyboardInterrupt:
-        print("\nProgram interrupted by user.")
+        asyncio.run(main())
+
