@@ -8,7 +8,7 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from source.LlmConnectors.LlmConnectorMap import get_llm
 
-from source.core.agent import CelestialAgent
+from source.core.agent.v2.agent import CelestialAgent
 
 script_dir = os.path.dirname(__file__)
 config_path = os.path.join(script_dir, "config/main/mainConfig.json")
@@ -97,7 +97,7 @@ async def main():
         voice_properties = config_data["audioOutDetails"]
         voice = CelestialVoice(rate=voice_properties["rate"],driver_name=voice_properties["driver_name"])
 
-        await main_interactive_loop(main_interactive_loop(voice,ear))
+        await main_interactive_loop(voice,ear,config_data)
 
     except KeyError as e:
         print(f"Configuration error: Missing key {e}.")
