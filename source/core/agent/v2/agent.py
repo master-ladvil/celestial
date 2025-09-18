@@ -8,7 +8,7 @@ from source.util.logger import logger
 
 class CelestialAgent:
     """Orchestrate thought-action-observation-loop"""
-    def __init__(self,llm,tools: List[Callable]) -> str:
+    def __init__(self,llm,tools: List[Callable]) -> None:
         self.llm = llm
         self.tools = tools
         self.prompt_manager = PromptManager()
@@ -30,7 +30,6 @@ class CelestialAgent:
 
             logger.info(f"--- Thinking (Loop {i+1}) ----")
             raw_response = await self.llm.ainvoke(prompt)
-            logger.debug(f"RAW_RESPOBNSE : {raw_response}")
             llm_output = raw_response.content
             logger.debug(f"llm Output : {llm_output}")
 
