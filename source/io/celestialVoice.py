@@ -1,10 +1,10 @@
 import multiprocessing
 import pyttsx3
 import asyncio
-
+from source.util.logger import logger
 
 def speak_proccess_target(text,driver_name,rate):
-    print(f"Celestial : {text}")
+    logger.info(f"Celestial : {text}")
     try:
         engine = pyttsx3.init(driverName=driver_name)
         engine.setProperty('rate', rate)
@@ -12,7 +12,7 @@ def speak_proccess_target(text,driver_name,rate):
         engine.runAndWait()
         engine.stop()
     except Exception as e:
-        print(f"TTS Process Error: {e}")
+        logger.error(f"TTS Process Error: {e}")
 
 
 
@@ -33,7 +33,7 @@ class CelestialVoice:
     def core_speech(self,text):
         # If there's somehow a process still lingering, terminate it.
         if self.current_process and self.current_process.is_alive():
-            print("Terminating speech process")
+            logger.info("Terminating speech process")
             self.current_process.terminate()
 
         # create and store new process
@@ -44,7 +44,7 @@ class CelestialVoice:
 
     async def stop(self):
         if self.current_process and self.current_process.is_alive():
-            print("Terminating speech process")
+            logger.info("Terminating speech process")
             self.current_process.terminate()
             await asyncio.sleep(0.1)
             self.current_process = None

@@ -1,13 +1,11 @@
 import asyncio
-import io
-import os
-import tempfile
 import torch
 import whisper
 import numpy as np
 from queue import Queue
 from threading import Thread, Event
 import speech_recognition as sr
+from source.util.logger import logger
 
 class CelestialEar:
 
@@ -15,7 +13,7 @@ class CelestialEar:
         """
         Initializes the CelestialEar transcriber.
 
-        Args:
+        Args:e
             model_name (str): The name of the Whisper model to use (e.g., "tiny.en", "base.en").
             energy_threshold (int): The energy level for considering audio as speech.
             pause_threshold (float): Seconds of non-speaking audio before a phrase is considered complete.
@@ -30,12 +28,12 @@ class CelestialEar:
 
         # Determine the device for Torch
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Whisper will run on {self.device}")
+        logger.info(f"Whisper will run on {self.device}")
 
         #Load the whisper model
-        print(f"Loading Whisper model: {self.model_name}...")
+        logger.info(f"Loading Whisper model: {self.model_name}...")
         self.model = whisper.load_model(self.model_name, device=self.device)
-        print("Whisper loaded successfully...")
+        logger.info("Whisper loaded successfully...")
 
         self.recognizer = sr.Recognizer()
         self.recognizer.energy_threshold = transcribe_properties["energy_threshold"]
@@ -56,9 +54,9 @@ class CelestialEar:
         This is the target for the background listening thread.
         """
         with sr.Microphone(sample_rate=self.sample_rate) as source:
-            print("Adjusting for ambient noise...")
+            logger.info("Adjusting for ambient noise...")
             self.recognizer.adjust_for_ambient_noise(source)
-            print("Listening...")
+            logger.info("Listening...")
 
             while not self.stop_event.is_set():
                 try:
@@ -67,7 +65,7 @@ class CelestialEar:
                 except sr.WaitTimeoutError:
                     continue #No speach detected
                 except Exception as e:
-                    print(f"Error in listening thread : {e}")
+                    logger.critical(f"Error in listening thread : {e}")
 
     def _process_audio(self):
         """
@@ -77,7 +75,7 @@ class CelestialEar:
         while not self.stop_event.is_set():
             try:
                 audio_data = self.audio_queue.get(timeout=1.0)
-                print("audio data received preparing for transcription...")
+                logger.info("audio data received preparing for transcription...")
 
                 raw_data = audio_data.get_raw_data()
                 audio_np = np.frombuffer(raw_data,dtype=np.int16)
@@ -88,7 +86,7 @@ class CelestialEar:
                 result = self.model.transcribe(audio_fp32,fp16=torch.cuda.is_available())
                 text = result['text'].strip()
                 if text:
-                    print(f"You said: {text}")
+                    logger.info(f"You said: {text}")
                     self.result_queue.put(text)
 
                 self.audio_queue.task_done()
@@ -112,7 +110,7 @@ class CelestialEar:
             command = await loop.run_in_executor(None, self.result_queue.get)
             return command
         except asyncio.CancelledError:
-            print("Listening task cancelled....")
+            logger.info("Listening task cancelled....")
             return None
 
     def stop(self):

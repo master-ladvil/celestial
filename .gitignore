@@ -1,2 +1,6 @@
 celestialEnv
 .env
+celestialEnv/
+__pycache__/
+*.pyc
+*.log

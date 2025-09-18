@@ -7,7 +7,7 @@ from source.tools.invocation.tools import get_current_time, open_application, se
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from source.LlmConnectors.LlmConnectorMap import get_llm
-
+from source.util.logger import logger
 from source.core.agent.v2.agent import CelestialAgent
 
 script_dir = os.path.dirname(__file__)
@@ -18,7 +18,7 @@ def load_config_data():
         with open(config_path, 'r') as file:
             return json.load(file)
     except Exception as e:
-        print(f"Error while getting config file: {e}")
+        logger.critical(f"Error while getting config file: {e}")
         return None
 
 
@@ -28,9 +28,9 @@ async def process_and_speak(user_input,voice,agent):
         response  = await agent.get_response(user_input=user_input)
         await voice.speak(response)
     except asyncio.CancelledError:
-        print("Response task was cancelled successfully")
+        logger.info("Response task was cancelled successfully")
     except Exception as e:
-        print(f"Error During agent Response {e}")
+        logger.error(f"Error During agent Response {e}")
 
 @DeprecationWarning
 async def initialize_agent():
@@ -58,7 +58,7 @@ async def main_interactive_loop(voice,ear,config_data):
     """
     Initializes the agent and runs the main interactive loop.
     """
-    print("Initializing agent for interactive session...")
+    logger.info("Initializing agent for interactive session...")
 
     llm = get_llm(config_data["llmDetails"])
     tools=[get_current_time,open_application,search_internet]
@@ -71,7 +71,7 @@ async def main_interactive_loop(voice,ear,config_data):
         user_input = await ear.listen()
         if user_input:
             if speaking_task and not speaking_task.done():
-                print("Interrupting previous Response.")
+                logger.info("Interrupting previous Response.")
                 speaking_task.cancel()
                 await voice.stop()
 
@@ -86,7 +86,7 @@ async def main_interactive_loop(voice,ear,config_data):
 async def main():
     config_data = load_config_data()
     if not config_data:
-        print("Problem loading in config data..")
+        logger.error("Problem loading in config data..")
         return
 
     ear = None
@@ -100,12 +100,12 @@ async def main():
         await main_interactive_loop(voice,ear,config_data)
 
     except KeyError as e:
-        print(f"Configuration error: Missing key {e}.")
+        logger.error(f"Configuration error: Missing key {e}.")
     except KeyboardInterrupt:
-        print("\n Program interupted by user")
+        logger.info("\n Program interupted by user")
     finally:
         if ear:
-            print("Shutting down listening threads")
+            logger.info("Shutting down listening threads")
             ear.stop()
 
 

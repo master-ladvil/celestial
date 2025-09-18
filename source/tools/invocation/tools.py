@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 from langchain_core.tools import tool
+from source.util.logger import logger
 
 # agent tools for invoking and using inhouse application
 
@@ -32,7 +33,7 @@ def search_internet(query: str) -> str:
     Searches the internet using duckduckgo fo a given query and returns the top 3-5 results.
     Use this for questions about current events, facts or information not known to the AI
     """
-    print(f"Searching internet for : {query}")
+    logger.info(f"Searching internet for : {query}")
     with DDGS() as ddgs:
         results = [search_result['body'] for search_result in ddgs.text(query, region="us-en", max_results=5)]
         return "\n".join(results) if results else "No results found"
