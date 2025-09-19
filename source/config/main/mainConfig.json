@@ -16,7 +16,7 @@
   {
     "model_name": "base.en",
     "energy_threshold": 1000,
-    "pause_threshold": 0.8,
+    "pause_threshold": 2,
     "phrase_time_limit": 10,
     "timeout": 1.0,
     "sample_rate": 16000

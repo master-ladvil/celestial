@@ -14,24 +14,29 @@ class CelestialAgent:
         self.prompt_manager = PromptManager()
         self.toolDispatcher =  ToolDispatcher(tools=tools)
         self.responseParser = ResponseParser()
+        self.scratchpad = ""
         logger.info("Celestial agent V2 is initialised with prompt and tool manager")
+
+    def _reset_memory(self):
+        self.scratchpad=""
+        logger.debug("scratchpad cleared")
 
     async def get_response(self,user_input) -> str:
         logger.info(f"Agent received input : {user_input}")
-        scratchpad=""
+        self._reset_memory()
         max_loops=5
 
         for i in range(max_loops):
             prompt =  self.prompt_manager.build_prompt(
                 user_input=user_input,
                 tools=self.tools,
-                scratchpad=scratchpad
+                scratchpad=self.scratchpad
             )
 
             logger.info(f"--- Thinking (Loop {i+1}) ----")
             raw_response = await self.llm.ainvoke(prompt)
             llm_output = raw_response.content
-            logger.debug(f"llm Output : {llm_output}")
+            logger.debug(f"LLM Raw Output:\n{llm_output}")
 
             parsed_response = self.responseParser.parse(llm_output)
             if parsed_response["type"] == "final_answer":
@@ -43,16 +48,16 @@ class CelestialAgent:
                 tool_input = parsed_response["action_input"]
                 observation = self.toolDispatcher.execute_tool(tool_name=tool_name,tool_input=tool_input)
                 logger.info(f"Observation from the tool : {observation}")
-                scratchpad += f"\n{llm_output}\nObservation: {observation}"
+                self.scratchpad += f"\n{llm_output}\nObservation: {observation}"
 
                 logger.debug("\n --- action scratchpad ---")
-                logger.debug(scratchpad)
+                logger.debug(self.scratchpad)
                 logger.debug(" --- action scratchpad ---\n")
 
 
             else:
                 logger.error("Agent failed to parse LLM Response")
-                return "Im sorry, i got a bit confused. could you please rephrase your request?"
+                self.scratchpad += f"\n{llm_output}\nObservation: My previous thought was invalid. I must think again, following the required format of 'Thought:','Action:' and 'Action Input:'."
 
         logger.warning("Agent reached maximum loop limit.")
         return " I seem to be stuck in a thought loop.. Ill stop here to be safe"
