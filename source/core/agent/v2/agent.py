@@ -46,14 +46,15 @@ class CelestialAgent:
             if parsed_response["type"] == "action" :
                 tool_name = parsed_response["action_name"]
                 tool_input = parsed_response["action_input"]
+                thought = parsed_response["thought"]
                 observation = self.toolDispatcher.execute_tool(tool_name=tool_name,tool_input=tool_input)
                 logger.info(f"Observation from the tool : {observation}")
-                self.scratchpad += f"\n{llm_output}\nObservation: {observation}"
+
+                self.scratchpad += f"\nThought: {thought}\nAction: {tool_name}\nAction Input: {tool_input}\nObservation: {observation}"
 
                 logger.debug("\n --- action scratchpad ---")
                 logger.debug(self.scratchpad)
                 logger.debug(" --- action scratchpad ---\n")
-
 
             else:
                 logger.error("Agent failed to parse LLM Response")
