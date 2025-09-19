@@ -45,9 +45,10 @@ class CelestialAgent:
                 logger.info(f"Observation from the tool : {observation}")
                 scratchpad += f"\n{llm_output}\nObservation: {observation}"
 
-                logger.debug("\n --- scratchpad ---")
+                logger.debug("\n --- action scratchpad ---")
                 logger.debug(scratchpad)
-                logger.debug("-------------\n")
+                logger.debug(" --- action scratchpad ---\n")
+
 
             else:
                 logger.error("Agent failed to parse LLM Response")
