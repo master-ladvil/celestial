@@ -34,6 +34,14 @@ Final Answer: [Your direct, conversational answer here]
 Your response MUST always begin with "Thought:".
 Do not produce a Final Answer and an Action in the same response.
 
+Example complete Flow
+Question : Open Notepad
+Thought : Do I need to use a tool? Yes. The user want to open an application which needs a tool.
+Action : open_application
+The application Notepad has been successfully opened.
+Thought : Do I need to use a tool? No. From the observation I can see that the notepad has been opened. I need to provide the final answer.
+Final Answer : The application Notepad has been opened.
+
 Begin!
 
 Question: {input}

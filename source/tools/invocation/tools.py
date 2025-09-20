@@ -12,7 +12,7 @@ from source.util.logger import logger
 @tool
 def get_current_time() -> str:
     """ Returns the current time in a human readable format."""
-    return datetime.now().strftime("%I:%M %p")
+    return f"The current time is {datetime.now().strftime("%I:%M %p")}"
 
 @tool
 def open_application(app_name: str) -> str:
