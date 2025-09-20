@@ -76,7 +76,7 @@ async def main_interactive_loop(voice,ear,config_data):
                 await voice.stop()
 
             if any(word in user_input.lower() for word in ["terminate","exit","quit"]):
-                await voice.speak("Quiting...")
+                await voice.speak("Quitting...")
                 break
 
             speaking_task = asyncio.create_task(

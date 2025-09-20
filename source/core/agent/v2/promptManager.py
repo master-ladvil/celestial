@@ -17,7 +17,7 @@ class PromptManager:
         """Format the list of tools into a string description"""
         return "\n".join([f"-{tool.name}:{tool.description}" for tool in tools])
 
-    def build_prompt(self,user_input:str,tools:List[Callable],scratchpad:List[Dict[str,str]])->str:
+    def build_prompt(self,user_input:str,tools:List[Callable],scratchpad:str)->str:
         """builds the prompt by replacing the keys in the prompt with the values"""
         tool_names = ", ".join([tool.name for tool in tools])
         tool_description = self._format_tools(tools)

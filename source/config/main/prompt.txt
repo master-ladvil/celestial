@@ -37,4 +37,4 @@ Do not produce a Final Answer and an Action in the same response.
 Begin!
 
 Question: {input}
-Thought:{agent_scratchpad}
+{agent_scratchpad}

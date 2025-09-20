@@ -14,11 +14,11 @@ class CelestialAgent:
         self.prompt_manager = PromptManager()
         self.toolDispatcher =  ToolDispatcher(tools=tools)
         self.responseParser = ResponseParser()
-        self.scratchpad: List[Dict[str, str]] = []
+        self.scratchpad = ""
         logger.info("Celestial agent V2 is initialised with prompt and tool manager")
 
     def _reset_memory(self):
-        self.scratchpad = []
+        self.scratchpad = ""
         logger.debug("Scratchpad cleared")
 
     async def get_response(self,user_input) -> str:
@@ -50,20 +50,14 @@ class CelestialAgent:
                 observation = self.toolDispatcher.execute_tool(tool_name=tool_name,tool_input=tool_input)
                 logger.info(f"Observation from the tool : {observation}")
 
-                self.scratchpad.append({
-                    "thought" : thought,
-                    "action_log": f"Action: {tool_name}\nAction Input: {tool_input}\nObservation: {observation}"
-                })
+                self.scratchpad += f"\nThought: {thought}\nAction: {tool_name}\nAction Input: {tool_input}\n{observation}"
                 logger.debug("\n --- action scratchpad ---")
                 logger.debug(self.scratchpad)
                 logger.debug(" --- action scratchpad ---\n")
 
             else:
                 logger.error("Agent failed to parse LLM Response")
-                self.scratchpad.append({
-                    "thought": thought,
-                    "action_log": f"Invalid Response: My previous thought was invalid. I must think again, following the required format of 'Thought:', 'Action:' and 'Action Input:'."
-                })
+                self.scratchpad += f"thought: {thought}\n Invalid Response: My previous thought was invalid. I must think again, following the required format of 'Thought:', 'Action:' and 'Action Input:'."
 
         logger.warning("Agent reached maximum loop limit.")
         return " I seem to be stuck in a thought loop.. Ill stop here to be safe"
