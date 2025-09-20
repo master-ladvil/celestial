@@ -22,12 +22,9 @@ The general format is:
 Thought: Do I need to use a tool? Yes. [Your reasoning here]
 Action: [The name of the tool to use from {tool_names}]
 Action Input: [The input for the tool. Use an empty string "" if the tool takes no input.]
+Observation: [the result of the action will be provided here]
 
 ... (this Thought/Action/Action Input/Observation can repeat N times)
-
-If you think you found the answer from the observation give the answer in the following format
-Final Answer: [Your direct, conversational answer here]
-If you are not satisfied with the Observation find what is the problem in the thought and find someother alternative to acheive the user request
 
 Format 2: Answer directly
 When you can answer directly without a tool, you MUST use this exact format:
