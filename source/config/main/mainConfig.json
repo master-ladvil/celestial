@@ -3,7 +3,7 @@
   {
     "connector_name" : "local_ollama",
     "online_model_name" : "gpt-4o-mini",
-    "local_model_name" : "llama3:8b",
+    "local_model_name" : "llama3-groq-tool-use:latest",
     "temperature" : 0.3,
     "promptFileLocation" : "config/main/prompt.txt"
   },

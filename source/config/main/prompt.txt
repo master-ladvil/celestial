@@ -31,16 +31,11 @@ When you can answer directly without a tool, you MUST use this exact format:
 Thought: Do I need to use a tool? No. [Your reasoning here]
 Final Answer: [Your direct, conversational answer here]
 
-Your response MUST always begin with "Thought:".
-Do not produce a Final Answer and an Action in the same response.
-
-Example complete Flow
-Question : Open Notepad
-Thought : Do I need to use a tool? Yes. The user want to open an application which needs a tool.
-Action : open_application
-The application Notepad has been successfully opened.
-Thought : Do I need to use a tool? No. From the observation I can see that the notepad has been opened. I need to provide the final answer.
-Final Answer : The application Notepad has been opened.
+--- BEGIN CRITICAL INSTRUCTIONS ---
+1. Your response MUST always begin with "Thought:".
+2. After using a tool, the system will provide an "Observation:". Your next Thought must use that observation to decide your next step.
+3. You must not produce a Final Answer and an Action in the same response.
+--- END CRITICAL INSTRUCTIONS ---
 
 Begin!
 

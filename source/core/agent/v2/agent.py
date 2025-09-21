@@ -57,20 +57,20 @@ class CelestialAgent:
 
                 self.scratchpad += f"\nThought: {thought}\nAction: {tool_name}\nAction Input: {tool_input}\nObservation: {observation}"
                 if i> 2:
-                    self.scratchpad +="\n I received the observation from the tool,I also has previous observations from my previous actions, i should check all the observations and give the Thought to check if the user request is completed to give the Final Answer or should i take another action"
+                    self.scratchpad +="\nSystem Feedback: I received the observation from the tool,I also has previous observations from my previous actions, i should check all the observations and give the Thought to check if the user request is completed to give the Final Answer or should i take another action"
                 else:
-                    self.scratchpad +="\n I received the observation from the tool, i will now give the thought of using this observation to give the final answer or take another action"
+                    self.scratchpad +="\nSystem Feedback: I received the observation from the tool, i will now give the thought of using this observation to give the final answer or take another action"
                 self._print_scratchpad()
 
             elif parsed_response["type"] == "observationHallucination":
-                self.scratchpad += f"\n Invalid Response: In my previous response i gave the 'Observation' which must be given by the tool. I must think again, and should only give 'Thought:', 'Action:' and 'Action Input: in my next iteration'."
+                self.scratchpad += f"\nSystem Feedback: My last response was invalid because I generated an 'Observation'. Only the system can provide observations. I will now try again, providing only 'Thought', 'Action', and 'Action Input'."
                 self._print_scratchpad()
             elif parsed_response["type"] == "FinalAnswerHallucination":
-                self.scratchpad += f"\n Invalid Response: In my previous response i gave the action as well as Final answer. I should not give final answer or observation with Action. The observation will be provided by the tool, i should wait for the observation and then analyse the observation to give the final answer."
+                self.scratchpad += f"\nSystem Feedback: My last response was invalid because I generated an 'Action' and a 'Final Answer' together. I must only do one or the other. I will now try again."
                 self._print_scratchpad()
 
             elif parsed_response["type"] == "noActionNoFinalAnswer":
-                self.scratchpad += f"thought: {thought}\n Invalid Response: My previous thought did not have an action or final answer after a thought. I must think if i should give a final answer or an action and action input"
+                self.scratchpad += f"Thought: {thought}\nSystem Feedback: My last thought was incomplete. I must follow every thought with either an 'Action' or a 'Final Answer'. I will now try again."
                 self._print_scratchpad()
 
             else:
