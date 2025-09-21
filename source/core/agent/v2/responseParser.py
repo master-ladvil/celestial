@@ -9,19 +9,28 @@ class ResponseParser:
 
         final_answer_match = re.search(r"Final Answer:\s*(.*)", response_text, re.IGNORECASE | re.DOTALL)
         if final_answer_match:
+            action_match = re.search(r"Action:\s*(.*?)",response_text,re.IGNORECASE | re.DOTALL)
+            if action_match:
+                logger.warning("LLM Hallucinated Final answer with Action...")
+                return {"type": "FinalAnswerHallucination","Thought":thought}
+
             content = final_answer_match.group(1).strip()
             return {"type": "final_answer", "content": content, "thought": thought}
 
-        action_match = re.search(r"Action:\s*(.*?)\nAction Input:\s*(.*?)(?:\nObservation:|$)", response_text, re.DOTALL)
+        action_match = re.search(r"Action:\s*(.*?)\nAction Input:\s*(.*?)(?:\n|$)", response_text, re.DOTALL)
         if action_match:
 
             if "\nObservation:" in action_match.group(0):
                 logger.warning("LLM hallucinated an observation...")
-                # return {"type": "error", "content": "LLM hallucinated an observation.", "thought": thought}
+                return {"type": "observationHallucination", "content": "LLM hallucinated an observation.", "thought": thought}
 
             action = action_match.group(1).strip()
             action_input = action_match.group(2).strip().strip('"')
             return {"type": "action", "action_name": action, "action_input": action_input, "thought": thought}
+
+        if not final_answer_match and not action_match:
+            logger.warning("LLM failed to provide  action or final answer.")
+            return {"type": "noActionNoFinalAnswer","thought":thought}
 
 
         logger.warning(f"Could not parse LLM Response {response_text}")
