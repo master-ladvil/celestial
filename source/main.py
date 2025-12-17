@@ -3,7 +3,7 @@ import asyncio
 import os
 from source.io.celestialVoice import CelestialVoice
 from source.io.transcribe import CelestialEar
-from source.io.console import CelestialConsole, CompositeVoice  # Import the new classes
+from source.io.console import CelestialConsole, CompositeVoice
 from source.tools.invocation.tools import get_current_time, open_application, search_internet
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
@@ -13,6 +13,7 @@ from source.core.agent.v2.agent import CelestialAgent
 
 script_dir = os.path.dirname(__file__)
 config_path = os.path.join(script_dir, "config/main/mainConfig.json")
+
 
 def load_config_data():
     try:
@@ -111,9 +112,12 @@ async def main_interactive_loop(voice, ear, config_data):
     celestial_agent = CelestialAgent(llm=llm, tools=tools)
     await voice.speak("Celestial Activated... How can i Help?")
 
+    # Determine the input mode from config
+    input_mode = config_data.get("io", {}).get("input_mode", "voice")
+
     speaking_task = None
     while True:
-        # ear.listen() is now polymorphic! It handles both text and voice.
+        # ear.listen() is polymorphic! It handles both text and voice.
         user_input = await ear.listen()
 
         if user_input:
@@ -126,9 +130,14 @@ async def main_interactive_loop(voice, ear, config_data):
                 await voice.speak("Quitting...")
                 break
 
-            speaking_task = asyncio.create_task(
-                process_and_speak(user_input=user_input, voice=voice, agent=celestial_agent)
-            )
+            # If in text mode, we wait for the agent to finish before asking again (Cleaner UI)
+            if input_mode == "text":
+                await process_and_speak(user_input=user_input, voice=voice, agent=celestial_agent)
+            else:
+                # In voice mode, we run in background to allow interruptions
+                speaking_task = asyncio.create_task(
+                    process_and_speak(user_input=user_input, voice=voice, agent=celestial_agent)
+                )
 
 
 async def main():

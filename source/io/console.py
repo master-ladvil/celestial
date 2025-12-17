@@ -17,7 +17,7 @@ class CelestialConsole:
             Uses asyncio.to_thread to prevent blocking the event loop.
         """
         try:
-            print("/n Type your message (or 'exit' to quit):  ")
+            print("\n Type your message (or 'exit' to quit):  ")
             user_input = await asyncio.to_thread(input, "You : ")
             return user_input.strip()
         except Exception as e:
